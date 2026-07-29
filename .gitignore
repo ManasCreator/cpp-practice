@@ -1,7 +1,10 @@
 .vscode/
 
-*.exe
 *.out
 *.o
+*.exe
+
+*.dSYM/
+*.dSYM
 
 .DS_Store
