@@ -1,5 +1,5 @@
 
-//Lower bound = first position where the element is greater than or equal to the key.
+//Upper bound = first position where the element is greater to the key.
 #include <iostream>
 using namespace std;
 
