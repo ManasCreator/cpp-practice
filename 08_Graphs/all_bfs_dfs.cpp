@@ -300,14 +300,161 @@ bool hasPath(int src, int dest,
 
     return false;
 }
+// 13. CYCLE DETECTION - UNDIRECTED GRAPH-dfs
 
+bool cycleDFS(int node, int parent,
+              const vector<vector<int>>& adj,
+              vector<int>& visited)
+{
+    visited[node] = 1;
+
+    for(int next : adj[node])
+    {
+        if(!visited[next])
+        {
+            if(cycleDFS(next, node, adj, visited))
+                return true;
+        }
+        else if(next != parent)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool detectCycle(int V, const vector<vector<int>>& adj)
+{
+    vector<int> visited(V, 0);
+
+    for(int i = 0; i < V; i++)
+    {
+        if(!visited[i])
+        {
+            if(cycleDFS(i, -1, adj, visited))
+                return true;
+        }
+    }
+
+    return false;
+}
+
+// 14. CYCLE DETECTION - DIRECTED GRAPH
+
+bool directedCycleDFS(int node,
+                      const vector<vector<int>>& adj,
+                      vector<int>& visited,
+                      vector<int>& pathVisited)
+{
+    visited[node] = 1;
+    pathVisited[node] = 1;
+
+    for(int next : adj[node])
+    {
+        if(!visited[next])
+        {
+            if(directedCycleDFS(next, adj, visited, pathVisited))
+                return true;
+        }
+        else if(pathVisited[next])
+        {
+            return true;
+        }
+    }
+
+    pathVisited[node] = 0;
+    return false;
+}
+
+bool detectDirectedCycle(int V, const vector<vector<int>>& adj)
+{
+    vector<int> visited(V, 0);
+    vector<int> pathVisited(V, 0);
+
+    for(int i = 0; i < V; i++)
+    {
+        if(!visited[i])
+        {
+            if(directedCycleDFS(i, adj, visited, pathVisited))
+                return true;
+        }
+    }
+
+    return false;
+}
+// 15. BIPARTITE GRAPH - BFS
+
+bool isBipartite(int V, const vector<vector<int>>& adj)
+{
+    vector<int> color(V, -1);
+    queue<int> q;
+
+    for(int i = 0; i < V; i++)
+    {
+        if(color[i] == -1)
+        {
+            color[i] = 0;
+            q.push(i);
+
+            while(!q.empty())
+            {
+                int node = q.front();
+                q.pop();
+
+                for(int next : adj[node])
+                {
+                    if(color[next] == -1)
+                    {
+                        color[next] = 1 - color[node];
+                        q.push(next);
+                    }
+                    else if(color[next] == color[node])
+                    {
+                        return false;
+                    }
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+// 16. INDEGREE AND OUTDEGREE - DIRECTED
+
+
+void calculateInOutDegree(int V, const vector<vector<int>>& adj)
+{
+    vector<int> indegree(V, 0);
+    vector<int> outdegree(V, 0);
+
+    for(int i = 0; i < V; i++)
+    {
+        outdegree[i] = adj[i].size();
+
+        for(int next : adj[i])
+        {
+            indegree[next]++;
+        }
+    }
+
+    cout << "Vertex\tIndegree\tOutdegree\n";
+
+    for(int i = 0; i < V; i++)
+    {
+        cout << i << "\t"
+             << indegree[i] << "\t\t"
+             << outdegree[i] << endl;
+    }
+}
 // MAIN FUNCTION
 
 int main()
 {
     int V, E;
 
-    cout << "Enter number of vertices and edges: ";
+    cout << "Enter vertices and edges: ";
     cin >> V >> E;
 
     vector<vector<int>> adj(V);
@@ -317,12 +464,12 @@ int main()
     printAdjList(V, adj);
 
     int start;
-
-    cout << "\nEnter starting vertex: ";
+    cout << "Enter starting vertex: ";
     cin >> start;
 
     vector<int> visited(V, 0);
 
+    cout << "BFS: ";
     BFS(start, adj, visited);
     cout << endl;
 
@@ -335,20 +482,26 @@ int main()
     DFS_Iterative(start, adj);
     cout << endl;
 
+    cout << "Disconnected BFS: ";
+    BFS_Disconnected(V, adj);
+    cout << endl;
+
     cout << "Connected Components: "
          << countComponents(V, adj) << endl;
 
     int src, dest;
 
-    cout << "\nEnter source and destination: ";
+    cout << "Enter source and destination: ";
     cin >> src >> dest;
 
     shortestPath(src, dest, adj);
-
     cout << endl;
 
-    cout << "Path Exists: "
-         << (hasPath(src, dest, adj) ? "Yes" : "No");
+    cout << "Undirected Cycle: "
+         << (detectCycle(V, adj) ? "Yes" : "No") << endl;
+
+    cout << "Bipartite: "
+         << (isBipartite(V, adj) ? "Yes" : "No") << endl;
 
     return 0;
 }
